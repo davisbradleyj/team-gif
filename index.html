@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+
+<body>
+    <h1>Gallery of Stars</h1>
+    <div id="buttons-view"></div>
+
+    <form id="person-form">
+        <label for="person-input">Add a Person</label>
+        <input type="text" id="person-input"><br>
+
+        <input id="add-person" type="submit" value="Add a Person">
+    </form>
+
+    <div id="gifs-appear-here"></div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script type="text/javascript">
+        var people = [];
+
+        // Function for displaying movie data
+        function renderButtons() {
+
+            // Deletes the movies prior to adding new movies
+            // (this is necessary otherwise you will have repeat buttons)
+            $("#buttons-view").empty();
+
+            // Loops through the array of movies
+            for (var i = 0; i < people.length; i++) {
+
+                // Then dynamicaly generates buttons for each movie in the array
+                // This code $("<button>") is all jQuery needs to create the beginning and end tag. (<button></button>)
+                var newButton = $("<button>");
+                // Adds a class of movie to our button
+                newButton.addClass("person");
+                // Added a data-attribute
+                newButton.attr("person-name", people[i]);
+                // Provided the initial button text
+                newButton.text(people[i]);
+                // Added the button to the buttons-view div
+                $("#buttons-view").append(newButton);
+            }
+        }
+
+        // This function handles events where the add movie button is clicked
+        $("#add-person").on("click", function (event) {
+            event.preventDefault();
+            // This line of code will grab the input from the textbox
+            var person = $("#person-input").val().trim();
+
+            // The movie from the textbox is then added to our array
+            people.push(person);
+            // Calling renderButtons which handles the processing of our movie array
+            renderButtons();
+
+        });
+
+        $(".person").on("click", function () {
+            var person = $(this).attr("person-name");
+            var queryURL = "https://api.giphy.com/v1/gifs/search?q=" +
+                person + "&api_key=wslWpWhssAgYDK6zVXacBDsacT47flr4&limit=10";
+            
+            $.ajax({
+                url: queryURL,
+                method: "GET"
+            })
+                .then(function (response) {
+                    console.log(response)   
+                    var results = response.data
+                    var gifDiv = $("<div>");
+                    var rating = results.rating;
+                    var p = $("<p>").text("Rating: " + rating);
+                    var personImage = $("<img>");
+                    personImage.attr("src", results.images.fixed_height.url);
+                    gifDiv.prepend(p);
+                    gifDiv.prepend(personImage);
+                    $("#gifs-appear-here").prepend(gifDiv);
+                    })
+        });
+    </script>
+</body>
+
+</html>
